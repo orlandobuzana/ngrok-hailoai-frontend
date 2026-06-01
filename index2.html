@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Euler — Math AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js"></script>
+<style>
+:root {
+  --bg:#0c0c0e;--s1:#111114;--s2:#18181d;--s3:#1f1f26;--s4:#26262f;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.1);
+  --text:#e8e8f0;--muted:#6b6b80;--muted2:#9494a8;
+  --accent:#7c6aff;--accent2:#a594ff;--accentbg:rgba(124,106,255,0.1);
+  --green:#34d399;--red:#f87171;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Geist',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;-webkit-font-smoothing:antialiased}
+.shell{display:flex;height:100vh;max-width:1280px;margin:0 auto}
+.sidebar{width:260px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:20px 16px 14px;border-bottom:1px solid var(--border)}
+.logo-mark{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Instrument Serif',serif;font-size:18px;color:#fff;flex-shrink:0}
+.logo-name{font-size:0.88rem;font-weight:600;color:var(--text);letter-spacing:-0.2px}
+.logo-tag{font-family:'Geist Mono',monospace;font-size:0.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.stabs{display:flex;padding:8px 8px 0;gap:2px;border-bottom:1px solid var(--border)}
+.stab{flex:1;padding:7px 4px;text-align:center;font-size:0.72rem;font-weight:500;color:var(--muted);cursor:pointer;border-radius:6px 6px 0 0;transition:all 0.15s;position:relative}
+.stab::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--accent);border-radius:1px 1px 0 0;opacity:0;transition:opacity 0.15s}
+.stab.active{color:var(--accent2)}.stab.active::after{opacity:1}
+.stab:hover:not(.active){color:var(--muted2);background:var(--s2)}
+.sbody{flex:1;overflow-y:auto;padding:12px}
+.sbody::-webkit-scrollbar{width:3px}.sbody::-webkit-scrollbar-thumb{background:var(--s4);border-radius:2px}
+.spanel{display:none}.spanel.active{display:block}
+.new-btn{width:100%;padding:9px 12px;border-radius:8px;border:1px dashed rgba(124,106,255,0.35);background:transparent;color:var(--accent2);font-family:'Geist',sans-serif;font-size:0.78rem;font-weight:500;cursor:pointer;margin-bottom:12px;transition:all 0.15s;display:flex;align-items:center;gap:7px;justify-content:center}
+.new-btn:hover{background:var(--accentbg);border-color:var(--accent)}
+.lesson-item{padding:10px 12px;border-radius:8px;cursor:pointer;border:1px solid transparent;margin-bottom:5px;transition:all 0.15s}
+.lesson-item:hover{background:var(--s2);border-color:var(--border2)}.lesson-item.active{background:var(--accentbg);border-color:rgba(124,106,255,0.25)}
+.li-title{font-size:0.8rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.li-meta{font-family:'Geist Mono',monospace;font-size:0.6rem;color:var(--muted)}
+.li-del{float:right;font-size:0.65rem;color:var(--muted);padding:2px 4px;cursor:pointer;border-radius:3px;transition:all 0.15s}
+.li-del:hover{color:var(--red);background:rgba(248,113,113,0.1)}
+.empty{text-align:center;padding:28px 12px;color:var(--muted);font-size:0.78rem;line-height:1.8}
+#notes-area{width:100%;min-height:280px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Geist Mono',monospace;font-size:0.78rem;line-height:1.7;padding:12px;resize:none;outline:none;transition:border-color 0.15s}
+#notes-area:focus{border-color:rgba(124,106,255,0.4)}#notes-area::placeholder{color:var(--muted)}
+.save-notes-btn{margin-top:8px;width:100%;padding:8px;background:transparent;border:1px solid var(--border2);border-radius:7px;color:var(--muted2);font-family:'Geist',sans-serif;font-size:0.75rem;font-weight:500;cursor:pointer;transition:all 0.15s}
+.save-notes-btn:hover{border-color:var(--accent);color:var(--accent2);background:var(--accentbg)}
+.topic-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.topic-btn{padding:9px 8px;background:var(--s2);border:1px solid var(--border);border-radius:7px;color:var(--muted2);font-family:'Geist',sans-serif;font-size:0.72rem;font-weight:500;cursor:pointer;text-align:center;transition:all 0.15s}
+.topic-btn:hover{border-color:rgba(124,106,255,0.35);color:var(--accent2);background:var(--accentbg)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px;border-bottom:1px solid var(--border);background:var(--s1);flex-shrink:0;gap:12px}
+.topbar-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+#session-title{font-size:0.88rem;font-weight:500;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.title-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 6px var(--green);animation:pulse 2.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.model-select{background:var(--s3);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:'Geist Mono',monospace;font-size:0.7rem;padding:6px 10px;outline:none;cursor:pointer;transition:border-color 0.15s}
+.model-select:focus{border-color:rgba(124,106,255,0.4)}
+.tb-btn{padding:6px 14px;border-radius:7px;font-family:'Geist',sans-serif;font-size:0.75rem;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--muted2);transition:all 0.15s;white-space:nowrap}
+.tb-btn:hover{color:var(--text);background:var(--s3)}.tb-btn.primary{background:var(--accent);border-color:transparent;color:#fff}
+.tb-btn.primary:hover{background:var(--accent2)}
+#chat-box{flex:1;overflow-y:auto;display:flex;flex-direction:column;padding:0}
+#chat-box::-webkit-scrollbar{width:4px}#chat-box::-webkit-scrollbar-thumb{background:var(--s4);border-radius:2px}
+.welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;text-align:center;gap:14px}
+.welcome-glyph{font-family:'Instrument Serif',serif;font-size:64px;color:var(--accent2);line-height:1;margin-bottom:4px;opacity:0.9}
+.welcome h2{font-family:'Instrument Serif',serif;font-size:1.8rem;font-weight:400;color:var(--text);letter-spacing:-0.5px}
+.welcome p{font-size:0.88rem;color:var(--muted2);max-width:380px;line-height:1.75}
+.chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:6px}
+.chip{padding:7px 14px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;font-size:0.78rem;font-weight:500;color:var(--muted2);cursor:pointer;transition:all 0.15s}
+.chip:hover{border-color:rgba(124,106,255,0.4);color:var(--accent2);background:var(--accentbg)}
+.msg-row{display:flex;gap:0;padding:20px 24px;border-bottom:1px solid var(--border);animation:msgIn 0.2s ease-out;align-items:flex-start}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg-row.user-row{background:var(--s1)}.msg-row.ai-row{background:var(--bg)}
+.msg-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;margin-top:1px;margin-right:14px}
+.avatar-u{background:var(--s4);border:1px solid var(--border2);color:var(--muted2);font-family:'Geist Mono',monospace;font-size:10px}
+.avatar-ai{background:var(--accent);color:#fff;font-family:'Instrument Serif',serif;font-size:14px}
+.msg-main{flex:1;min-width:0}
+.msg-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.msg-who{font-size:0.8rem;font-weight:600;color:var(--text)}
+.msg-time{font-family:'Geist Mono',monospace;font-size:0.62rem;color:var(--muted)}
+.msg-model{font-family:'Geist Mono',monospace;font-size:0.6rem;padding:2px 7px;border-radius:4px;background:var(--accentbg);color:var(--accent2);border:1px solid rgba(124,106,255,0.15)}
+.msg-body{font-size:0.9rem;line-height:1.8;color:var(--text)}
+.math-code{margin:12px 0;border-radius:8px;border:1px solid var(--border2);overflow:hidden;background:#0a0a10}
+.math-code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--s2);border-bottom:1px solid var(--border)}
+.code-lang-label{font-family:'Geist Mono',monospace;font-size:0.65rem;color:var(--accent2);letter-spacing:0.5px}
+.code-copy-btn{font-family:'Geist Mono',monospace;font-size:0.62rem;color:var(--muted);cursor:pointer;padding:2px 8px;border-radius:4px;border:1px solid var(--border2);background:transparent;transition:all 0.15s}
+.code-copy-btn:hover{color:var(--text)}
+.math-code-body{padding:16px;font-family:'Geist Mono',monospace;font-size:0.8rem;line-height:1.7;color:#c9d1e0;overflow-x:auto;white-space:pre}
+.think-row{display:flex;align-items:center;gap:14px;padding:18px 24px;border-bottom:1px solid var(--border)}
+.think-dots{display:flex;align-items:center;gap:5px;padding:8px 14px;background:var(--s2);border:1px solid var(--border);border-radius:20px}
+.td{width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:0.3;animation:tdp 1.2s ease-in-out infinite}
+.td:nth-child(2){animation-delay:0.2s}.td:nth-child(3){animation-delay:0.4s}
+@keyframes tdp{0%,80%,100%{transform:scale(1);opacity:0.3}40%{transform:scale(1.4);opacity:1}}
+.input-area{border-top:1px solid var(--border);padding:14px 20px;background:var(--s1);flex-shrink:0}
+.input-wrap{display:flex;align-items:flex-end;gap:10px;background:var(--s2);border:1px solid var(--border2);border-radius:12px;padding:10px 12px;transition:border-color 0.2s,box-shadow 0.2s}
+.input-wrap:focus-within{border-color:rgba(124,106,255,0.4);box-shadow:0 0 0 3px rgba(124,106,255,0.06)}
+#user-input{flex:1;background:transparent;border:none;outline:none;resize:none;font-family:'Geist',sans-serif;font-size:0.9rem;color:var(--text);line-height:1.55;max-height:130px;min-height:24px;overflow-y:auto;caret-color:var(--accent2)}
+#user-input::placeholder{color:var(--muted)}
+#user-input::-webkit-scrollbar{width:3px}#user-input::-webkit-scrollbar-thumb{background:var(--s4)}
+.send-btn{width:34px;height:34px;border-radius:8px;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0;transition:all 0.15s}
+.send-btn:hover:not(:disabled){background:var(--accent2);transform:scale(1.06)}
+.send-btn:disabled{background:var(--s4);color:var(--muted);cursor:not-allowed;transform:none}
+.input-footer{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:0.65rem;color:var(--muted);font-family:'Geist Mono',monospace}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:200}
+.overlay.open{display:flex}
+.modal{background:var(--s2);border:1px solid var(--border2);border-radius:14px;padding:28px;width:360px;box-shadow:0 24px 60px rgba(0,0,0,0.5)}
+.modal-title{font-family:'Instrument Serif',serif;font-size:1.2rem;color:var(--text);margin-bottom:18px;font-weight:400}
+.modal input{width:100%;padding:10px 13px;background:var(--s3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Geist',sans-serif;font-size:0.88rem;outline:none;margin-bottom:16px;transition:border-color 0.15s}
+.modal input:focus{border-color:rgba(124,106,255,0.45)}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end}
+.m-cancel{padding:8px 16px;border-radius:7px;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-family:'Geist',sans-serif;font-size:0.8rem;font-weight:500;cursor:pointer;transition:all 0.15s}
+.m-cancel:hover{color:var(--text)}
+.m-save{padding:8px 18px;border-radius:7px;background:var(--accent);border:none;color:#fff;font-family:'Geist',sans-serif;font-size:0.8rem;font-weight:500;cursor:pointer;transition:all 0.15s}
+.m-save:hover{background:var(--accent2)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--s3);border:1px solid var(--border2);color:var(--text);padding:10px 18px;border-radius:8px;font-size:0.8rem;opacity:0;transform:translateY(8px);transition:all 0.25s;pointer-events:none;z-index:500;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+.toast.show{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">&#8721;</div>
+    <div>
+      <div class="logo-name">Euler</div>
+      <div class="logo-tag">AI Math Teacher</div>
+    </div>
+  </div>
+  <div class="stabs">
+    <div class="stab active" onclick="switchTab('lessons')">Lessons</div>
+    <div class="stab" onclick="switchTab('notes')">Notes</div>
+    <div class="stab" onclick="switchTab('topics')">Topics</div>
+  </div>
+  <div class="sbody">
+    <div class="spanel active" id="panel-lessons">
+      <button class="new-btn" onclick="newSession()">+ New Session</button>
+      <div id="lessons-list"><div class="empty">No saved lessons yet.<br>Chat and click Save to keep one.</div></div>
+    </div>
+    <div class="spanel" id="panel-notes">
+      <textarea id="notes-area" placeholder="Jot down formulas, questions, ideas&#10;&#10;Auto-saves as you type." rows="13"></textarea>
+      <button class="save-notes-btn" onclick="saveNotes()">Save notes</button>
+    </div>
+    <div class="spanel" id="panel-topics">
+      <div class="topic-grid">
+        <div class="topic-btn" onclick="startTopic('Algebra basics and equations')">Algebra</div>
+        <div class="topic-btn" onclick="startTopic('Calculus: derivatives and integrals')">Calculus</div>
+        <div class="topic-btn" onclick="startTopic('Trigonometry and the unit circle')">Trigonometry</div>
+        <div class="topic-btn" onclick="startTopic('Probability and statistics')">Statistics</div>
+        <div class="topic-btn" onclick="startTopic('Linear algebra and matrices')">Linear Algebra</div>
+        <div class="topic-btn" onclick="startTopic('Number theory and primes')">Number Theory</div>
+        <div class="topic-btn" onclick="startTopic('Geometry and proofs')">Geometry</div>
+        <div class="topic-btn" onclick="startTopic('Differential equations')">Diff. Equations</div>
+        <div class="topic-btn" onclick="startTopic('Set theory and logic')">Logic</div>
+        <div class="topic-btn" onclick="startTopic('Complex numbers')">Complex Nums</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="title-dot"></div>
+      <span id="session-title">New session</span>
+    </div>
+    <div class="topbar-right">
+      <select class="model-select" id="model-select">
+        <option value="llama3">llama3.2:3b</option>
+        <option value="qwen-coder">qwen2.5-coder:1.5b</option>
+        <option value="qwen-instruct" selected>qwen2.5-instruct:1.5b</option>
+        <option value="deepseek-r1">deepseek-r1:1.5b</option>
+        <option value="qwen2">qwen2:1.5b</option>
+      </select>
+      <button class="tb-btn" onclick="newSession()">Clear</button>
+      <button class="tb-btn primary" onclick="openSaveModal()">Save lesson</button>
+    </div>
+  </div>
+
+  <div id="chat-box">
+    <div class="welcome" id="welcome-screen">
+      <div class="welcome-glyph">&#8747;</div>
+      <h2>What shall we explore?</h2>
+      <p>Ask me anything in mathematics — from arithmetic to graduate-level proofs. Step-by-step explanations with full LaTeX support.</p>
+      <div class="chips">
+        <div class="chip" onclick="sendChip('Explain the Pythagorean theorem with a proof')">Pythagorean theorem</div>
+        <div class="chip" onclick="sendChip('Teach me the chain rule for derivatives with examples')">Chain rule</div>
+        <div class="chip" onclick="sendChip('What is Eulers identity and why is it beautiful?')">Euler's identity</div>
+        <div class="chip" onclick="sendChip('Find the roots of f(x) = x squared + 3x minus 4 step by step')">Solve a quadratic</div>
+        <div class="chip" onclick="sendChip('Explain what a limit is intuitively and formally')">What is a limit?</div>
+        <div class="chip" onclick="sendChip('Quiz me on basic algebra, one question at a time')">Quiz me</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <div class="input-wrap">
+      <textarea id="user-input" rows="1" placeholder="Ask a math question..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()">&#8594;</button>
+    </div>
+    <div class="input-footer">
+      <span>Enter to send &middot; Shift+Enter for newline</span>
+      <span>Supports LaTeX: $x^2$ or $$\int f\,dx$$</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="save-modal">
+  <div class="modal">
+    <div class="modal-title">Save this lesson</div>
+    <input type="text" id="lesson-name-input" placeholder="e.g. Introduction to Derivatives" maxlength="60">
+    <div class="modal-btns">
+      <button class="m-cancel" onclick="closeSaveModal()">Cancel</button>
+      <button class="m-save" onclick="saveLesson()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SYSTEM_PROMPT = `You are Euler, a world-class mathematics teacher. Your role:
+- Explain concepts step by step, clearly numbered (Step 1, Step 2...)
+- Use LaTeX for all math: inline as $...$ and display as $$...$$
+- Give worked examples; offer to quiz the student or go deeper
+- Be encouraging, precise, and patient - no question is too basic
+- Keep responses focused and clear
+- When asked to quiz, give one question at a time with feedback`;
+
+let chatHistory = [{ role:'system', content:SYSTEM_PROMPT }];
+let currentTitle = 'New session';
+let isThinking = false;
+
+function loadLessons(){ try{ return JSON.parse(localStorage.getItem('euler2_lessons')||'[]') }catch{ return [] } }
+function saveLessonsStore(l){ localStorage.setItem('euler2_lessons', JSON.stringify(l)) }
+
+document.getElementById('notes-area').value = localStorage.getItem('euler2_notes') || '';
+renderLessonsList();
+
+function switchTab(t){
+  const tabs = ['lessons','notes','topics'];
+  document.querySelectorAll('.stab').forEach((el,i) => el.classList.toggle('active', tabs[i]===t));
+  document.querySelectorAll('.spanel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+t).classList.add('active');
+}
+
+function saveNotes(){ localStorage.setItem('euler2_notes', document.getElementById('notes-area').value); showToast('Notes saved'); }
+document.getElementById('notes-area').addEventListener('input', () => {
+  clearTimeout(window._nt);
+  window._nt = setTimeout(() => localStorage.setItem('euler2_notes', document.getElementById('notes-area').value), 900);
+});
+
+function renderLessonsList(){
+  const lessons = loadLessons();
+  const el = document.getElementById('lessons-list');
+  if(!lessons.length){ el.innerHTML='<div class="empty">No saved lessons yet.<br>Chat and click Save to keep one.</div>'; return; }
+  el.innerHTML = lessons.map((l,i) => `
+    <div class="lesson-item" id="li-${i}" onclick="loadLesson(${i})">
+      <span class="li-del" onclick="delLesson(event,${i})">x</span>
+      <div class="li-title">${escHtml(l.title)}</div>
+      <div class="li-meta">${l.date} &middot; ${l.messages.length} msgs</div>
+    </div>`).join('');
+}
+
+function loadLesson(idx){
+  const l = loadLessons()[idx];
+  chatHistory = [...l.messages];
+  currentTitle = l.title;
+  document.getElementById('session-title').textContent = l.title;
+  document.querySelectorAll('.lesson-item').forEach(e => e.classList.remove('active'));
+  const li = document.getElementById('li-'+idx); if(li) li.classList.add('active');
+  rebuildUI();
+  showToast('Lesson loaded');
+}
+
+function delLesson(e, idx){
+  e.stopPropagation();
+  const lessons = loadLessons(); lessons.splice(idx,1);
+  saveLessonsStore(lessons); renderLessonsList(); showToast('Deleted');
+}
+
+function rebuildUI(){
+  const box = document.getElementById('chat-box');
+  box.innerHTML = '';
+  chatHistory.filter(m => m.role !== 'system').forEach(m => addBubble(m.role==='user'?'user':'ai', m.content, false));
+  box.scrollTop = box.scrollHeight;
+}
+
+function openSaveModal(){
+  if(!chatHistory.filter(m=>m.role!=='system').length){ showToast('Start a conversation first'); return; }
+  document.getElementById('lesson-name-input').value = currentTitle === 'New session' ? '' : currentTitle;
+  document.getElementById('save-modal').classList.add('open');
+  setTimeout(() => document.getElementById('lesson-name-input').focus(), 50);
+}
+function closeSaveModal(){ document.getElementById('save-modal').classList.remove('open'); }
+document.getElementById('lesson-name-input').addEventListener('keydown', e => { if(e.key==='Enter') saveLesson(); if(e.key==='Escape') closeSaveModal(); });
+document.getElementById('save-modal').addEventListener('click', function(e){ if(e.target===this) closeSaveModal(); });
+
+function saveLesson(){
+  const title = document.getElementById('lesson-name-input').value.trim() || 'Untitled Lesson';
+  const lessons = loadLessons();
+  const dateStr = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const existing = lessons.findIndex(l => l.title === title);
+  const entry = { title, date:dateStr, messages:[...chatHistory] };
+  if(existing >= 0) lessons[existing] = entry; else lessons.unshift(entry);
+  saveLessonsStore(lessons);
+  currentTitle = title;
+  document.getElementById('session-title').textContent = title;
+  renderLessonsList(); closeSaveModal(); showToast('Lesson saved');
+}
+
+function newSession(){
+  chatHistory = [{ role:'system', content:SYSTEM_PROMPT }];
+  currentTitle = 'New session';
+  document.getElementById('session-title').textContent = 'New session';
+  document.querySelectorAll('.lesson-item').forEach(e => e.classList.remove('active'));
+  document.getElementById('chat-box').innerHTML = `
+    <div class="welcome" id="welcome-screen">
+      <div class="welcome-glyph">&#8747;</div>
+      <h2>New session</h2>
+      <p>What would you like to explore today?</p>
+      <div class="chips">
+        <div class="chip" onclick="sendChip('Explain the Pythagorean theorem with a proof')">Pythagorean theorem</div>
+        <div class="chip" onclick="sendChip('Teach me the chain rule for derivatives')">Chain rule</div>
+        <div class="chip" onclick="sendChip('Quiz me on basic algebra, one question at a time')">Quiz me</div>
+      </div>
+    </div>`;
+}
+
+function startTopic(topic){
+  newSession();
+  setTimeout(() => { document.getElementById('user-input').value = 'Give me an introduction to '+topic; sendMessage(); }, 80);
+  switchTab('lessons');
+}
+
+function sendChip(text){ document.getElementById('user-input').value = text; sendMessage(); }
+function autoResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,130)+'px'; }
+function handleKey(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMessage(); } }
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function timeNow(){ return new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
+function removeWelcome(){ const w=document.getElementById('welcome-screen'); if(w) w.remove(); }
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+function getModelLabel(){ const sel=document.getElementById('model-select'); return sel.options[sel.selectedIndex].text; }
+
+function setFormattedText(el, text, doMath){
+  let html = escHtml(text)
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/`([^`\n]+)`/g,'<code style="font-family:Geist Mono,monospace;font-size:0.8rem;background:rgba(124,106,255,0.12);padding:1px 6px;border-radius:4px;color:var(--accent2)">$1</code>')
+    .replace(/\n/g,'<br>');
+  el.innerHTML = html;
+  if(doMath && window.MathJax) MathJax.typesetPromise([el]).catch(()=>{});
+}
+
+function renderContent(text, el){
+  const parts = text.split(/(```[\w-]*\n[\s\S]*?```)/g);
+  el.innerHTML = '';
+  parts.forEach(part => {
+    const cb = part.match(/^```([\w-]*)\n([\s\S]*?)```$/);
+    if(cb){
+      const lang = cb[1]||'text', code = cb[2];
+      const block = document.createElement('div');
+      block.className = 'math-code';
+      block.innerHTML = '<div class="math-code-header"><span class="code-lang-label">'+lang.toUpperCase()+'</span><button class="code-copy-btn" onclick="copyCode(this)">Copy</button></div><div class="math-code-body">'+escHtml(code)+'</div>';
+      el.appendChild(block);
+    } else if(part.trim()){
+      const p = document.createElement('div');
+      p.className = 'msg-body';
+      setFormattedText(p, part, true);
+      el.appendChild(p);
+    }
+  });
+}
+
+function copyCode(btn){
+  const code = btn.closest('.math-code').querySelector('.math-code-body').textContent;
+  navigator.clipboard.writeText(code).then(() => { btn.textContent='Copied'; setTimeout(()=>btn.textContent='Copy',2000); });
+}
+
+function addBubble(who, text, animate=true){
+  const box = document.getElementById('chat-box');
+  const row = document.createElement('div');
+  row.className = 'msg-row '+(who==='user'?'user-row':'ai-row');
+  if(!animate) row.style.animation='none';
+
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar '+(who==='user'?'avatar-u':'avatar-ai');
+  avatar.textContent = who==='user'?'YOU':'\u2211';
+  row.appendChild(avatar);
+
+  const main = document.createElement('div');
+  main.className = 'msg-main';
+  const meta = document.createElement('div');
+  meta.className = 'msg-meta';
+  meta.innerHTML = '<span class="msg-who">'+(who==='user'?'You':'Euler')+'</span><span class="msg-time">'+timeNow()+'</span>'+(who==='ai'?'<span class="msg-model">'+getModelLabel()+'</span>':'');
+  main.appendChild(meta);
+
+  const content = document.createElement('div');
+  main.appendChild(content);
+  row.appendChild(main);
+  box.appendChild(row);
+  box.scrollTop = box.scrollHeight;
+
+  if(who==='ai'){
+    if(text){ renderContent(text, content); if(window.MathJax) MathJax.typesetPromise([content]).catch(()=>{}); }
+  } else {
+    const b = document.createElement('div'); b.className='msg-body'; b.textContent=text; content.appendChild(b);
+  }
+  return content;
+}
+
+async function sendMessage(){
+  if(isThinking) return;
+  const input = document.getElementById('user-input');
+  const sendBtn = document.getElementById('send-btn');
+  const box = document.getElementById('chat-box');
+  const text = input.value.trim();
+  if(!text) return;
+
+  removeWelcome();
+  isThinking=true; input.disabled=true; sendBtn.disabled=true;
+  input.value=''; input.style.height='auto';
+
+  addBubble('user', text);
+  chatHistory.push({ role:'user', content:text });
+
+  const thinkRow = document.createElement('div');
+  thinkRow.className = 'think-row';
+  thinkRow.innerHTML = '<div class="msg-avatar avatar-ai">\u2211</div><div class="think-dots"><div class="td"></div><div class="td"></div><div class="td"></div></div>';
+  box.appendChild(thinkRow);
+  box.scrollTop = box.scrollHeight;
+
+  const model = document.getElementById('model-select').value;
+  let fullText = '';
+
+  try {
+    const resp = await fetch('https://ditto-kissing-darkening.ngrok-free.dev/api/chat', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','ngrok-skip-browser-warning':'true'},
+      body:JSON.stringify({ messages:chatHistory, model:model })
+    });
+
+    thinkRow.remove();
+    if(!resp.ok){ throw new Error('Gateway error ' + resp.status); }
+
+    const contentEl = addBubble('ai','');
+    const reader = resp.body.getReader();
+    const dec = new TextDecoder();
+
+    while(true){
+      const {done,value} = await reader.read();
+      if(done) break;
+      const chunk = dec.decode(value,{stream:true});
+      for(const line of chunk.split('\n')){
+        const l=line.trim();
+        if(!l.startsWith('data:')) continue;
+        const raw=l.slice(5).trim();
+        if(raw==='[DONE]') break;
+        try{
+          const p=JSON.parse(raw);
+          // Gateway v2 sends: { content: "...", model: "..." }
+          if(p.content){
+            fullText+=p.content;
+            renderContent(fullText,contentEl);
+            box.scrollTop=box.scrollHeight;
+          }
+          if(p.error){ throw new Error(p.error); }
+        }catch(e){}
+      }
+    }
+
+    renderContent(fullText,contentEl);
+    if(window.MathJax) MathJax.typesetPromise([contentEl]).catch(()=>{});
+    chatHistory.push({role:'assistant',content:fullText});
+    box.scrollTop=box.scrollHeight;
+
+  } catch(err){
+    thinkRow.remove();
+    addBubble('ai','Error: '+err.message);
+    console.error(err);
+  }
+
+  isThinking=false; input.disabled=false; sendBtn.disabled=false; input.focus();
+}
+</script>
+</body>
+</html>
