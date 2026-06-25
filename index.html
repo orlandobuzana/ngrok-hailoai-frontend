@@ -1215,8 +1215,9 @@ html, body {
 
 <script>
 // ── Config ────────────────────────────────────────────────────────────
-const GATEWAY    = 'https://ditto-kissing-darkening.ngrok-free.dev';
-const VISION_URL = GATEWAY.replace('/api/chat', '/api/vision');
+const GATEWAY    = 'https://ditto-kissing-darkening.ngrok-free.dev/api/chat';
+const VISION_URL = 'https://ditto-kissing-darkening.ngrok-free.dev/api/vision';
+const BASE_URL   = 'https://ditto-kissing-darkening.ngrok-free.dev';
 
 if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc =
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -1669,7 +1670,7 @@ async function triggerVision(){
     if(!resp.ok) throw new Error('Vision endpoint ' + resp.status);
     const data = await resp.json();
     const contentEl = addBubble('ai', '');
-    const BASE   = GATEWAY.replace('/api/chat', '');
+    const BASE   = BASE_URL;
     const imgUrl = data.image_url ? BASE + data.image_url + '?t=' + Date.now() : null;
     const imgId  = 'vi-' + Date.now();
     let html = '';
