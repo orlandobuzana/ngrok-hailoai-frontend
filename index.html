@@ -1224,14 +1224,14 @@ if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc =
 
 // ── Models — exact tags from your Ollama instance ────────────────────
 const MODELS = [
-  { id:'llama3',        tag:'llama3.2:3b',              label:'Llama 3.2',         size:'3B'  },
-  { id:'qwen-coder',    tag:'qwen2.5-coder:1.5b',       label:'Qwen 2.5 Coder',    size:'1.5B'},
-  { id:'qwen-instruct', tag:'qwen2.5-instruct:1.5b',    label:'Qwen 2.5 Instruct', size:'1.5B'},
-  { id:'deepseek-r1',   tag:'deepseek_r1_distill_qwen:1.5b', label:'DeepSeek R1', size:'1.5B'},
-  { id:'qwen2',         tag:'qwen2:1.5b',               label:'Qwen 2',            size:'1.5B'},
+  { id:'llama3',      tag:'llama3:latest',         label:'Llama 3',         size:'8B'  },
+  { id:'qwen-coder',  tag:'qwen2.5-coder:latest',  label:'Qwen 2.5 Coder',  size:'7.6B'},
+  { id:'deepseek-r1', tag:'deepseek-r1:7b',        label:'DeepSeek R1',     size:'7B'  },
+  { id:'tinyllama',   tag:'tinyllama:latest',       label:'TinyLlama',       size:'1B'  },
+  { id:'moondream',   tag:'moondream:latest',       label:'Moondream',       size:'1B'  },
 ];
 
-let activeModel  = 'qwen-instruct';
+let activeModel  = 'llama3';
 let ttsEnabled   = false;
 let pdfContext   = null;
 let isStreaming  = false;
